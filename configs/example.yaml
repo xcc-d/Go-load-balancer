@@ -1,0 +1,16 @@
+listen_addr: "127.0.0.1:8080"
+algorithm: "round_robin"
+servers:
+  - url: "http://localhost:8001"
+    weight: 1
+    health: "healthy"
+  - url: "http://localhost:8002"
+    weight: 1
+    health: "healthy"
+  - url: "http://localhost:8003"
+    weight: 1
+    health: "healthy"
+health_check:
+  interval: "10s"
+  timeout: "5s"
+  path: "/health"
