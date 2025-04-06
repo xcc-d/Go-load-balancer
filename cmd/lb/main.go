@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Go-load-balancer/internal/config"
-	"Go-load-balancer/internal/server"
 	"flag"
+	"go-load-balancer/internal/config"
+	"go-load-balancer/internal/server"
 	"log"
 )
 
@@ -24,9 +24,9 @@ func main() {
 	}
 
 	// 创建服务管理器
-	mgr := server.NewServerManager()
-	mgr.CreateFromConfig(cfg)
+	serverMgr := server.NewServerManager()
+	serverMgr.CreateFromConfig(cfg)
 
 	// 启动服务
-	mgr.StartAll()
+	serverMgr.StartAll()
 }

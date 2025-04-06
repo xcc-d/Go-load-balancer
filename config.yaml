@@ -1,0 +1,25 @@
+listen_addr: ":8080"
+algorithm: "weighted_rr"
+servers:
+  - url: "http://localhost:8081"
+    weight: 1
+    health_check_path: "/health"
+  - url: "http://localhost:8082"
+    weight: 3
+    health_check_path: "/health"
+  - url: "http://localhost:8083"
+    weight: 1
+    health_check_path: "/health"
+health_check:
+  interval: "10s"
+  timeout: "3s"
+  path: "/health"
+  retry_count: 3
+  retry_interval: "5s"
+  max_failures: 3 
+
+log:
+  level: "debug"          # 日志级别(debug/info/warn/error)
+  format: "text"          # 日志格式(text/json)
+  output: "file"        # 输出方式(stdout/file)
+  file_path: "" 

@@ -1,30 +1,29 @@
 package server
 
 import (
-	"Go-load-balancer/internal/config"
-	"context"
+	"go-load-balancer/internal/config"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 )
 
 // ServerManager 管理多个服务器实例
 type ServerManager struct {
-	servers []*HTTPServer
+	servers []Server
 	wg      sync.WaitGroup
 }
 
 // NewServerManager 创建新的服务管理器
 func NewServerManager() *ServerManager {
-	return &ServerManager{}
+	return &ServerManager{
+		servers: make([]Server, 0),
+	}
 }
 
 // AddServer 添加服务器到管理器
-func (m *ServerManager) AddServer(server *HTTPServer) {
+func (m *ServerManager) AddServer(server Server) {
 	m.servers = append(m.servers, server)
 }
 
@@ -37,10 +36,10 @@ func (m *ServerManager) StartAll() {
 	// 启动所有服务器
 	for _, s := range m.servers {
 		m.wg.Add(1)
-		go func(s *HTTPServer) {
+		go func(s Server) {
 			defer m.wg.Done()
-			if err := s.Start(); err != nil && err != http.ErrServerClosed {
-				log.Fatalf("服务器启动失败: %v", err)
+			if err := s.Start(); err != nil {
+				log.Printf("服务器启动失败: %v", err)
 			}
 		}(s)
 	}
@@ -49,12 +48,9 @@ func (m *ServerManager) StartAll() {
 	<-stopCh
 	log.Println("接收到终止信号，正在关闭服务器...")
 
-	// 优雅关闭
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+	// 停止所有服务器
 	for _, s := range m.servers {
-		if err := s.httpServer.Shutdown(ctx); err != nil {
+		if err := s.Stop(); err != nil {
 			log.Printf("服务器关闭失败: %v", err)
 		}
 	}
@@ -65,6 +61,6 @@ func (m *ServerManager) StartAll() {
 
 // CreateFromConfig 从配置创建服务器
 func (m *ServerManager) CreateFromConfig(cfg *config.LBConfig) {
-	server := NewHTTPServer(cfg)
+	server := NewStandardHTTPServer(cfg)
 	m.AddServer(server)
 }

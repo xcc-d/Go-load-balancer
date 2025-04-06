@@ -4,13 +4,19 @@ servers:
   - url: "http://localhost:8001"
     weight: 1
     health: "healthy"
-  - url: "http://localhost:8002"
+    health_check_path: "/health"  # HTTP健康检查路径
+  - url: "http://localhost:8002" 
     weight: 1
     health: "healthy"
+    health_check_path: ""  # 使用TCP检查
   - url: "http://localhost:8003"
     weight: 1
     health: "healthy"
+    health_check_path: "/ping"  # 自定义检查路径
 health_check:
-  interval: "10s"
-  timeout: "5s"
-  path: "/health"
+  interval: "5s"    # 检查间隔(10秒)
+  timeout: "5s"      # 检查超时(5秒) 
+  retry_count: 3     # 失败重试次数
+  retry_interval: "2s" # 重试间隔(2秒)
+  default_path: "/health" # 默认检查路径
+  max_failures: 3
